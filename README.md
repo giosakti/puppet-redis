@@ -3,8 +3,14 @@ Puppet Redis Module
 
 Module for configuring Redis.
 
-Tested on Debian GNU/Linux 6.0 Squeeze and Ubuntu 10.4 LTS with
-Puppet 2.6. Patches for other operating systems welcome.
+Tested on Ubuntu 11.04 and Puppet 2.7. 
+Patches for other operating systems welcome.
+
+UPDATE
+----
+
+June 25th, 2012
+Patched and tested to suit author purpose for Ubuntu 11.04
 
 
 TODO
