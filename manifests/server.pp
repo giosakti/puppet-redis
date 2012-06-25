@@ -1,19 +1,22 @@
 class redis::server($ensure=present,
-                    $version='2.4.5',
-                    $tar_version="2.4.5",
-                    $bind="127.0.0.1",
+                    $version="2.4.14",
+                    $tar_version="2.4.14",
                     $port=6379,
-                    $masterip="",
-                    $masterport=6379,
-                    $masterauth="",
-                    $requirepass="",
+                    $bind="127.0.0.1",
+                    $loglevel="notice",
+                    $databases=30,
+                    $working_dir="/var/lib/redis",
                     $aof=false,
                     $aof_auto_rewrite_percentage=100,
-                    $aof_auto_rewrite_min_size="64mb") {
+                    $aof_auto_rewrite_min_size="64mb",
+                    $masterip="",
+                    $masterport="",
+                    $masterauth="",
+                    $requirepass="") {
 
   $is_present = $ensure == "present"
   $is_absent = $ensure == "absent"
-  $bin_dir = '/usr/local/bin'
+  $bin_dir = "/usr/local/bin"
   $redis_home = "/var/lib/redis"
   $redis_log = "/var/log/redis"
 
@@ -29,16 +32,16 @@ class redis::server($ensure=present,
 
   file { "/etc/redis":
     ensure => $ensure ? {
-      'present' => "directory",
+      "present" => "directory",
       default => $ensure,
     },
     force => $is_absent,
     before => $ensure ? {
-      'present' => File["/etc/redis/redis.conf"],
+      "present" => File["/etc/redis/redis.conf"],
       default => undef,
     },
     require => $ensure ? {
-      'absent' => File["/etc/redis/redis.conf"],
+      "absent" => File["/etc/redis/redis.conf"],
       default => undef,
     },
   }
@@ -63,34 +66,34 @@ class redis::server($ensure=present,
     shell => "/bin/false",
     comment => "Redis Server",
     require => $ensure ? {
-      'present' => Group["redis"],
+      "present" => Group["redis"],
       default => undef,
     },
     before => $ensure ? {
-      'absent' => Group["redis"],
+      "absent" => Group["redis"],
       default => undef,
     },
   }
 
   file { [$redis_home, $redis_log]:
     ensure => $ensure ? {
-      'present' => directory,
+      "present" => directory,
       default => $ensure,
     },
     owner => $ensure ? {
-      'present' => "redis",
+      "present" => "redis",
       default => undef,
     },
     group => $ensure ? {
-      'present' => "redis",
+      "present" => "redis",
       default => undef,
     },
     require => $ensure ? {
-      'present' => Group["redis"],
+      "present" => Group["redis"],
       default => undef,
     },
     before => $ensure ? {
-      'absent' => Group["redis"],
+      "absent" => Group["redis"],
       default => undef,
     },
     force => $is_absent,
@@ -113,18 +116,18 @@ class redis::server($ensure=present,
     pattern => "${bin_dir}/redis-server",
     hasrestart => true,
     subscribe => $ensure ? {
-      'present' => [File["/etc/init.d/redis-server"],
+      "present" => [File["/etc/init.d/redis-server"],
                     File["/etc/redis/redis.conf"],
                     Redis::Install[$version],
                     Class["redis::overcommit"]],
       default => undef,
     },
     require => $ensure ? {
-      'present' => [File[$redis_log], User["redis"], File["/etc/init.d/redis-server"]],
+      "present" => [File[$redis_log], User["redis"], File["/etc/init.d/redis-server"]],
       default => undef,
     },
     before => $ensure ? {
-      'absent' => [User["redis"], File["/etc/init.d/redis-server"]],
+      "absent" => [User["redis"], File["/etc/init.d/redis-server"]],
       default => undef,
     },
   }

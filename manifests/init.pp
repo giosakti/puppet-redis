@@ -1,1 +1,4 @@
-# Required by Puppet for loading the module
+package {
+    $redis::dependencies::packages:
+      ensure => present
+  }
