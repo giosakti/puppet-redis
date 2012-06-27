@@ -1,6 +1,6 @@
 class redis::server($ensure=present,
+                    $prefix_dir="/usr/local",
                     $version="2.4.14",
-                    $tar_version="2.4.14",
                     $port=6379,
                     $bind="127.0.0.1",
                     $redis_loglevel="notice",
@@ -16,18 +16,13 @@ class redis::server($ensure=present,
 
   $is_present = $ensure == "present"
   $is_absent = $ensure == "absent"
-  $bin_dir = "/usr/local/bin"
+  $redis_bin_dir = "${prefix_dir}/bin"
+  $redis_src_dir = "${prefix_dir}/src/redis-${version}"
   $redis_home = "/var/lib/redis"
   $redis_log = "/var/log/redis"
 
   class { "redis::overcommit":
     ensure => $ensure,
-  }
-
-  redis::install { $version:
-    ensure => $ensure,
-    bin_dir => $bin_dir,
-    tar_version => $tar_version,
   }
 
   file { "/etc/redis":
@@ -49,7 +44,6 @@ class redis::server($ensure=present,
   file { "/etc/redis/redis.conf":
     ensure => $ensure,
     content => template("redis/redis.conf.erb"),
-    require => Redis::Install[$version],
   }
 
   group { "redis":
@@ -105,6 +99,10 @@ class redis::server($ensure=present,
     mode => 744,
   }
 
+  file { "${redis_bin_dir}/redis-server":
+    ensure => $ensure,
+  }
+
   file { "/etc/logrotate.d/redis-server":
     ensure => $ensure,
     source => "puppet:///modules/redis/redis-server.logrotate",
@@ -113,12 +111,12 @@ class redis::server($ensure=present,
   service { "redis-server":
     ensure => $is_present,
     enable => $is_present,
-    pattern => "${bin_dir}/redis-server",
+    pattern => "${redis_bin_dir}/redis-server",
     hasrestart => true,
     subscribe => $ensure ? {
       "present" => [File["/etc/init.d/redis-server"],
                     File["/etc/redis/redis.conf"],
-                    Redis::Install[$version],
+                    File["${redis_bin_dir}/redis-server"],
                     Class["redis::overcommit"]],
       default => undef,
     },
