@@ -28,7 +28,7 @@ port <%= port %>
 # specified all the interfaces will listen for incoming connections.
 #
 # bind 127.0.0.1
-<% if bind -%>
+<% if bind != 'null' -%>
 bind <%= bind %>
 <% end -%>
 
